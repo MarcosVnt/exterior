@@ -1,0 +1,686 @@
+
+php artisan make:migration create_error_logs_table --create=error_logs
+migracion
+php artisan migrate
+php artisan make:model ErrorLog
+
+php artisan make:controller ErrorLogController
+
+
+FALTA PONER EL REGISTRO EN TODOS LOS ERRORES ...
+
+
+
+
+rotuleon tiene internet 
+s h
+https://support.atlassian.com/bitbucket-cloud/docs/set-up-an-ssh-key/
+
+
+
+
+
+nuevo cambio 
+
+añadir campos linea bultos 
+-------------------------
+
+  $table->decimal('bultos', 12, 3)->nullable();
+          $table->integer('linea')->nullable();
+
+
+         php artisan make:migration add_piezas_linea_to_presupuesto_componentes
+         php artisan migrate
+
+
+
+
+** filtro horas fecha desde hasta
+____________________________
+php artisan nova:filter FiltroPorUsuarioHorasHasta --date
+
+
+** al borra componente recalcular articulo total y documento total
+
+
+
+** al borrar articulo y componente recalcular total documento
+
+
+
+
+
+AÑDIMOS CAMPOS A PRODUCTO TARIFA PARA ORDENAR... 
+
+DOCUMENTO 
+LINEA 
+php artisan make:migration add_linea_docu_to_tarifaproductos 
+
+php artisan make:migration add_dni_presupuestos
+
+1.	Cliente porder buscar datos de cliente ..  ficha dni ..
+a.	Si no existe : dar de alta y completar a mano mismos datoso dni .  email , teléfono no hay . ver presupuesto
+2horas 
+
+
+2.	Presupuestos columna imprimir :  para determinar que líneas del presupuesto se imprimen o no …
+1 hora
+
+3.	Alta de componente : en pequeño para que se pueda copiar detrás , limite de texto acorde con el que se muestra en documento.
+Sin cargo a cuenta de presupuesto inicial
+
+4.	Tamaño texto , tiene que ser el que se imprima en pdf.. ojo con tabulaciones unas los hace bien y otras mal..
+Sin cargo 
+
+5.	Orden de Lineas : 
+1 hora
+
+6.	Estado : Pte calculo (x defecto ) , 2 presupuestado , 
+3 presupuestado y enviado 4 aceptado , 5 denegado ..
+Sin cargo  a cuenta de presupuesto inicial
+
+7.	Enviar pdf por email : 
+a.	Saco pdf : se envía como cualquier pdf.
+b.	Boton enviar pdf y se envía con formato de email , a distintas direcciones de la empresa …
+4 horas 
+
+8.	Copia de seguridad de datos , exportar para subir a Dropbox ..
+Sin cargo mantenimiento 
+
+9.	Presupuesto Aceptado : 
+    Email al cliente indicando que ha sido aceptado .. y   etc..
+    Email a varios emails de la empresa para saber que ha sido aceptado con enlace al presupuesto.
+4 horas 
+
+10.	Producto tarifa
+Mantenimiento producto tarifa 
+    Ver comoponentes 
+Alta de nuevo componente 
+Alta de nuevo articulo 
+(Botones )
+      2 horas 
+
+11.	– Filtro sobre tablas : las busquedas realizar por cualquier campo 
+
+12- DECIMALES ancho , alto , metros cambiado a 3 DECIMALES en presupuesto_detalles, presupuesto_componentes, tarifa_productos
+    cantidad de tarifaproductos int cambiado a decimal 3  como el resto.
+
+13.- Descripcion articulos 2048 , cambiar tambien descripcion , producto tarifa , y componentes ..
+
+
+14 -- rehacer pantalla de productos acorde a componentes
+
+15 añadir mermas a articulos presupuesto_detalles
+1 añadir numero documento y ejercicio a presupuestos presupuesto_detalles
+
+
+
+
+
+
+php artisan make:migration add_mermas_to_presupuestos_detalle_table
+
+php artisan make:migration add_ejercicio_documento_to_presupuestos_table
+
+
+php artisan make:migration add_base_dto_to_presupuestos_detalle_table
+
+
+
+
+
+COMPRASVNT
+xmlCOntroller
+
+
+
+ComprasVntXml 
+ if (typeof me.arrayGestorcompra.length === "undefined"){  
+                    me.arrayGestorcompra = respuesta.gestorcompras;
+                  
+                    console.log('sin longitud',me.arrayGestorcompra());
+                }
+                
+
+
+DOS MODALES NO FUNCIONABA INPUT
+                
+    <div
+      class="modal fade"
+       id="modalBuscarrProductoTarifa"
+      tabindex="-3"
+      :class="{ mostrar: modalBuscarProductoTarifa }"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      style="display: none"
+      aria-hidden="true"
+    >
+
+
+ <button
+                type="button"
+                 data-toggle="modal"
+                        data-target="#modalBuscarrProductoTarifa"
+                @click="abrirModalProdcutoTarifa()"
+                class="btn btn-sm btn-primary"
+              >
+                <i class="icon-plus"></i>&nbsp;Buscar Producto Tarifa
+              </button>
+
+
+reordenar LINEAS 
+              https://codepen.io/xtrasmal/pen/PjgMqL
+https://www.geeksforgeeks.org/how-to-move-an-array-element-from-one-array-position-to-another-in-javascript/
+
+
+
+
+moveA -> mueve articulos 
+moveC -> mueve componentes 
+TODO :  GUARDAR ORDEN .... LINEAS ...
+
+
+1412 - A´DIR IVA A PRESUPESTO 
+TODO : COGER DEL ARTICULO ..  ahora es fijo en controller.
+
+OBSERVACIONES POR FORMA DE PAGO 
+TODO : AÑAIDR CABECERA CAMPO FORMA DE PAGO
+
+TESTEAR DATOS TRAIDOS DEL Cliente
+TODO  hacer funcion y quitar if.
+TODO  modal se añade arriba .. y si no encuentra avisar...
+
+
+
+
+
+
+
+
+mysqlcheck -c rotunova2 obra_mano -u root -p
+
+
+mysqlcheck -c rotunova2  -u root -p
+
+mysqlcheck -u root -p --auto-repair -c -o rotunova2
+
+mysqlcheck -r rotunova2 -u root -p
+
+
+
+reposiciona modal en pantalla
+ data-toggle="modal"
+data-target="#modalAltaArticuloComponente"
+
+
+
+
+ENERO 2021
+
+** REHACER PANTALLAS DE ARTICULOS = COMPONENTES = PRODUCTO TARIFA
+
+** comentarios en presupuesto
+         php artisan make:migration add_formapago_to_presupuestos_table
+
+
+
+** DATOS PRODUCCION
+   * comentarios
+   * documentos
+   * Imagenes
+    *pdf produccion : articulos sin compo sin precios
+
+
+** RECALCULOS
+   *articulos
+      * recalculo de beneficios con dto como?
+      
+    *componentes
+       * recalculo de total articulo
+
+
+** PRODUCTO TARIFA , rehacer nueva pantalla
+
+** PRESUPUESTO Aceptado
+    ** EMAIL , LISTA correo , ACEPTAR 
+
+** NOVA 
+    *FOTOS OBRAS : SI HAY MOSTRAR O MARCAR 
+    * BUSQUEDA SITE 
+    * fotos no meter en informe....
+
+** PRODUCTO TARIFA : 
+      ver descripcion : click .. .ver todo ...
+      revisar busqueda
+
+
+
+
+:: PROXMOS PASOS 
+
+    PRESUPUESTO -> ORDEN TRABAJO > FABRICADO
+      ORDEN : obligatorio obra , si pones ok , si no pones auto.... ojo como enviar a visual.
+    MENU FABRICACION :
+
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+
+
+añadir base a componentes
+php artisan make:migration add_base_to_presupuesto_componentes_table
+
+php artisan make:migration add_base_to_tarifaproductos_table
+
+
+
+git commit -m "reponiendo"
+
+git config --global user.email marcos.visualnt@gmail.com
+git config --global user.name Rotuleon
+
+git push -u origin master 
+
+
+
+PRESUPUESTOS SUBIR IMAGENES Y FICHEROS
+https://appdividend.com/2018/08/15/laravel-file-upload-example/
+
+
+
+php artisan make:model PresupuestosFichero -m
+
+
+
+
+añadir activado o no  a detalle
+php artisan make:migration add_activado_to_presupuestos_detalle_table
+
+
+COMPRAS AÑADIR NOTAS 8 . 3
+
+
+php artisan make:migration create_notaarticulo_table
+
+
+
+protudto tarifa , añandr mostrar a false  
+php artisan make:migration add_mostrar_to_tarifaproductos_table
+
+
+
+            $table->boolean('activa')->default(true);
+
+
+
+ABRIL /
+- buscqueda de presupuestos aceptados ..
+- producto tarifa 
+      al añadir  poner texto 
+      pulsar en texto y expandir , pulsar y cerrar...
+      crear producto tarifa pedir referencia y GUARDAR
+
+-compras vnt ... 
+    - si codigo 8888 , cabecera.nombre_fiscal ..
+    
+    - NOTAS :
+       añadir notas codigo proveedor y arrticulo
+    
+
+PRESUPUESTOS : 
+    -comentarios no guarda a veces .. .debe ser cuando no esta session on ... REVISAR....
+
+
+
+NOVA 
+https://medium.com/technicaliti/building-custom-tools-for-your-nova-resources-504462ba6414
+
+php artisan nova:resource-tool vnt/fotosUltimosDias
+yes , yes , no 
+crea estructura .. 
+src/fotosUltimosDias.php  -> añado cambpo saber
+
+
+ahora en nova/fieldas .. foto.php en fields añadimos 
+
+
+  MEJOR hacemos card.. como fotos ...
+  ojo https://github.com/RobinCK/vue-gallery#readme
+
+php artisan nova:card vnt/CardUltimasFotos
+
+https://flywheel.co/articles/how-to-create-custom-laravel-nova-cards
+
+
+php artisan nova:card my-app/mail-card
+
+php artisan nova:card vnt/ultimas-fotos-card
+
+
+php artisan clear-compiled
+composer dump-autoload
+If
+
+OJO PRUEBAS NO VALEN ... ANTERIORES 
+SI VAL FotosultimasCard
+https://flywheel.co/articles/how-to-create-custom-laravel-nova-cards
+
+PASO 1 CREATE CARD
+--------------------------------
+php artisan nova:card rotunova2/fotosultimas-card
+
+yes - yes - yes 
+
+PASO 2 COMPILE card
+_____________________________
+cd nova-componentes/FotosultimasCard
+npm run dev , watch, prod  
+
+
+PASO 3
+--------------------------
+add new card to deault nova dashboarda
+NovaServcieProvider   in cards()
+ojo e
+
+new \MyaApp
+
+
+
+
+
+obramano.vue , añadir select , campos 
+php artisan make:migration add_tipo_fin_to_obra_mano_table
+
+
+
+
+
+
+
+
+abril 2021
+GMAIL
+visualnt.rotuleon@gmail.comentarios
+Rotuleon_2020*
+
+
+bitbucket
+visualnt.rotuleon@gmail.com 
+Xeridia_2020*
+
+
+
+
+
+INSTLACION pusheer 
+_______________________________________________________________________________________________
+
+
+visualnt.rotuleon@gmail.comentarios
+Rotuleon_2020*
+
+JS  --> laravel eco.. ESCUCHAR LOS CANALES 
+nuevo pusher -- appkeys
+
+composer require pusher/pusher-php-server "^5.0"
+config/broadcast.php -_>env copia keys pusher
+
+añadimos laravel echo .escuchar canales
+npm install --save-dev laravel-echo pusher-js
+
+ bootstrap.js descomentamos linesa finales 
+
+
+npm install --save-dev laravel-echo pusher-js
+
+45----------
+Emitir eventos y broadcast con ellos
+
+
+app.php  BroadcastServiceProvider
+
+1.- crear evento
+php artisan make:event MessageSent
+e implement shouldBroadcast
+
+quien se puede subscribir a los canales ..
+canal publica example 
+
+cuando evento ocuura se comunica por canal , publico o privado..
+Observer ... 
+use App\event\MessageSent
+
+event(new MessageSent($mesage))  -- EVENTO  PUEDE HACER MUCHAS COSAS..o tareas enviar email, generar pdf , etc.
+
+enveto se comunica mediante queued job ...cola de trabajo.
+se atiende despues de responder usuario...
+damos trabajo a servidor para que lo realice cuando no tenga trabajo ...
+
+46
+
+config/queue.php 
+inicio queue sync -- se atiende ahoramismo...  mas adelante configurar driver para gestionar colas 
+mas simple database .. para guardar en base de datos y que el servidor vaya haciendo ... TODO ...
+
+
+VERIFICAR QUE MENSAJE ES TRANSMITIDO .. 
+broadcast_driver log --> envento ..
+pusher
+storage/logs/laravel.log
+
+capturar informacion enviada a pusher .. 
+Recivng broadcast
+
+Echo.channel  LIstening for eventos
+
+instanciando laravel echo .. 
+app.js en bootstrap.js se instanciando
+
+desde vue en mounted Echo.channel('example).listen
+
+VER 
+https://medium.com/@aschmelyun/adding-real-time-updates-to-your-laravel-and-vue-apps-with-laravel-websockets-a1d9a69f7c12
+
+
+
+_____FINPUSHER-----------------------------------------------------------
+
+
+
+
+mailgun --> envio de email para desarrolladores ...
+
+
+
+01-08 JUN 
+COMPRAS.VNT boton crear pedido 
+
+PS F:\xampp\htdocs\rotunova2> php artisan make:migration add 
+
+
+
+php artisan make:migration create_propietarios_table --create=propietarios
+ php artisan make:model Terreno -c -m
+
+  php artisan make:model Valla -c -m
+
+
+php artisan make:seeder VallasSeeder
+
+php artisan db:seed
+
+git ----- 
+
+
+
+
+php artisan make:migration create_clientes_table --create=clientes
+php artisan make:migration create_contratos_table --create=contratos
+php artisan make:migration create_anunciantes_table --create=anunciantes 
+
+php artisan make:test VallasTest
+
+php artisan make:factory PropietarioFactory
+
+
+
+instalando geolocalizacion
+
+npm install --save-dev  vue-browser-geolocation
+solo sabes la localizacion del usuario
+
+
+npm install --save-dev vue2-google-maps 
+
+
+contratos
+php artisan make:model Agencia -c -m
+php artisan make:model Cliente -c -m
+
+php artisan make:model Contrato -c -m
+
+
+php artisan make:factory ContratoFactory
+
+
+
+
+2023 
+añadimos columnas a terreno 
+
+php artisan make:migration add_costes_to_terrenos --table="terrenos"
+
+añado campos a tabla terrenos
+creo menu terrenos que no estaba
+terreno 
+    vallas  
+        contratos
+
+rentabilidad terreno
+rentabilidad valla
+
+propietario
+Agencias
+
+
+terrenos 
+  propietario_id
+
+vallas 
+  terreno_id 
+
+contratos 
+  agencia_id
+  cliente_id
+  valla_id 
+
+terreno de un contrato .. valla_id 
+
+
+
+
+
+
+projects              
+    id - integer
+    name - string
+ 
+environments
+    id - integer
+    project_id - integer
+    name - string
+ 
+deployments
+    id - integer
+    environment_id - integer
+    commit_hash - string
+
+desde projects 
+
+public function deployments()
+    {
+        return $this->hasManyThrough(alquequeremosacceder Deployment::class, intermedio...Environment::class);
+    }
+
+
+
+
+php artisan tinker
+$user = App\User::where('email', 'marcos@visualnt.net')->first();
+$user->password = Hash::make('Paco_2023');
+
+$user->save();
+
+
+ENERO 31/01/2023
+pantalla de terrenos ..
+
+terrenosAdmin .. 
+  lista de Vallas 
+      alta valla  
+      editar valla
+      lista de vallas , botones y color .. 
+
+
+  
+  al editar valla añade una ... corregir 
+
+  contratos .. baja y alta .. 1 alta 2 baja .. en editar y controller .. 11.20
+
+  11.40  columna contrato 
+        fin de contrato ..  forma de pago ... importe anual 
+
+11.54
+  boton editar contrato 
+12.15
+
+  
+  todo 
+
+  valla baja ?? recuperar y mostrar ..
+  buscar por id/valla????
+  test ide valla debe coincidir con id de terreno 
+
+
+Febrero 23 .. entregado terrenos vallas y contratos en una sola pantalla 
+
+falta :  coste terreno por terreno o valla ... 
+
+
+php artisan make:migration add_calculocostes_to_terrenos --table="terrenos"
+  modo_calculo
+
+php artisan make:migration add_calculo_costes_to_vallas --table="vallas"
+      forma_pago
+      importe_periodo
+      alquiler_anual
+
+terrenos : 
+    calculo sobre tres valores .
+        forma_pago    importe_periodo   alquiler_anual
+
+         b             c                b
+
+    editar y nuevo ...
+
+vallas 
+    editar y nuevo ..
+
+
+OJO , si calcula por vallas hay que recalcular el importe de terreno...
+  al añadir vallas
+  al editar vallas
+  al eliminar o baja de vallas ...
+
+    calculo  : consulto vallas de un terreno y sumo campo alquiler-anual 
+    guardo en terreno.alquiler_anual...
+
+
+    
+
+
+GUIA DE RUTAS 
+
+
+
+
+

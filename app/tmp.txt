@@ -1,0 +1,5 @@
+  /*  $originalPath = public_path();
+                $originalPath2 = public_path('storage\images\\');
+                $originalPath3 = public_path().'\images\\';
+                $originalPath4 = URL::to('/');
+                dd($originalPath,$originalPath2,$originalPath3,$originalPath4);

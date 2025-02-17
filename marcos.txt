@@ -1,0 +1,89 @@
+
+
+
+
+composer require laraning/nova-time-field
+
+
+fotoobra
+    bloquear pantalla para hasta que suba o cargador.
+    formulario , ver usuario
+                ver sus obras
+    borrar
+
+
+
+    nova 
+        permisos por usuarios
+            ver obras de un usuario
+
+
+
+
+
+
+
+
+                          /*   return [
+                        'gestorcompras' => $xml]; 
+
+
+                    } */
+
+                   /*  Excel::create('Filename', function($excel) use($xml) {
+
+                        $excel->sheet('Sheetname', function($sheet) use($xml) {
+                    
+                            $sheet->fromArray($xml);
+                    
+                        });
+                    
+                    })->export('xls'); */
+
+                    /* foreach ($xml as $key => $value) {
+                        foreach ($value as $key => $value) {
+                          echo $key.": ".$value."</br>";
+                        }
+
+                    } */
+
+                    //array to object
+
+                   // $data = (array)simplexml_load_string($xml);
+
+                    //dd($data);
+
+                    foreach ($xml as $key => $value) {
+                        foreach ($value as $key => $value) {
+                            //echo $key.": ".$value."</br>";
+                            $xml2[$key] = (object) $value;
+                          }
+                       
+                    }
+                        dd($xml, $xml2); 
+
+// collection 
+$vouchers = collect($xml)->map(function ($xml) {
+    return (object) $xml;
+});
+
+dd($vouchers,$xml);
+
+                      return Excel::download(new JornadasExport, 'products.xlsx');
+
+                    dd($xml, $xml->articulo);
+    
+                    return Excel::download($xml->articulo, 'compras.xls');
+
+
+
+        /* Excel::create('Compras', function($excel){
+            $excel->sheet('Articulos', function($sheet){
+
+               // $compras = Product::all();
+                $sheet->fromArray($xml);
+            });
+
+        })->export('xls'); */
+
+

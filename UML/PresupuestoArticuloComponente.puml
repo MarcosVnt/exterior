@@ -1,0 +1,15 @@
+@startuml
+
+
+class Presupuesto {
+
+}
+
+class ArticuloComponent {
+
+}
+
+Presupuesto o-- ArticuloComponent
+
+
+@enduml

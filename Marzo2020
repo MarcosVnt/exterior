@@ -1,0 +1,66 @@
+git clone https://rotuleon@bitbucket.org/rotuleonteam/rotuleon2020.git
+
+Leon_2020*
+kdkdk
+
+
+
+2020-07
+composer require dmitrybubyakin/nova-medialibrary-field
+
+
+composer require spatie/laravel-medialibrary
+
+
+
+https://github.com/RobinCK/vue-gallery
+
+card en foto , solo en detalle
+
+composer require codebykyle/calculated-field
+instalado 
+
+temporaryUrl
+
+hacer metricas de horas x obra , total , grafica y donuts.
+
+https://flywheel.co/articles/how-to-create-custom-laravel-nova-cards
+php artisan nova:card my-app/mail-card  si si si 
+./nova-components/MailCard
+
+
+
+composer require barryvdh/laravel-dompdf
+
+CardEnvioEmail
+
+php artisan nova:card rotunova2/accesoemailfoto
+
+yes
+
+
+enviar CardEnvioEmail
+
+php artisan make:mail CongratulateWinner --markdown=email.congratulate-winner-content
+https://voltagead.com/creating-a-crm-with-laravel-nova/
+https://programacionymas.com/blog/escribir-emails-en-laravel-usando-markdown
+
+php artisan make:mail FotosClienteExterno --markdown=emails.fotos.FotosCliente
+php artisan make:mail AceptarComoPresupuestado --markdown=emails.presupuestos.AceptarComoPresupuestado
+
+
+fotos externo 
+1 loginController
+2 principalexterno.blade
+3 foto-global-externo .vue
+
+
+
+php artisan migrate --path=/database/migrations/2020_08_06_093824_create_presupuestos_table.php
+
+
+
+
+
+
+

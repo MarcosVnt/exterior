@@ -1,0 +1,140 @@
+SELECT username, avatar, (select count(*) from tbl_entries where user_id = U.user_id) AS cnt FROM tbl_users AS U WHERE user_id = x
+
+select count(*) from obra_mano where 
+
+
+CONCAT(
+        FLOOR(
+            sum(
+                case when Hour(TIMEDIFF(a_fecha_hora, de_fecha_hora))*60 = 0 
+                    then Minute(TIMEDIFF(a_fecha_hora, de_fecha_hora))
+                    else Hour(TIMEDIFF(a_fecha_hora, de_fecha_hora))*60
+                end
+            )/60
+        ),'h', 
+        MOD(
+            sum(
+                case when Hour(TIMEDIFF(a_fecha_hora, de_fecha_hora))*60 = 0 
+                    then Minute(TIMEDIFF(a_fecha_hora, de_fecha_hora))
+                    else Hour(TIMEDIFF(a_fecha_hora, de_fecha_hora))*60
+                end
+            )
+        ,60)
+    , 'm')
+    as 'tempo' from obra_mano om
+---------------------------------------------
+SELECT
+    om.obra_id, om.user_id,om.texto,om.de_fecha_hora,om.a_fecha_hora,
+    timediff(om.a_fecha_hora,om.de_fecha_hora) as totales,
+    (SELECT sum((hour(timediff(a_fecha_hora,de_fecha_hora))*60)+minute(timediff(a_fecha_hora,de_fecha_hora))) FROM obra_mano AS omd 
+        WHERE omd.obra_id = om.obra_id AND om.a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-10 00:00:00' ) AS sumcol
+FROM obra_mano AS om
+INNER JOIN obras ON obras.id = om.obra_id 
+INNER JOIN users ON users.id = om.user_id
+WHERE om.a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-10 00:00:00' 
+
+--------------------------------------------
+SELECT obra_mano.obra_id,obras.codigo,obras.nombre,
+obra_mano.user_id,users.name,
+obra_mano.texto,obra_mano.de_fecha_hora,obra_mano.a_fecha_hora,
+timediff(obra_mano.a_fecha_hora,obra_mano.de_fecha_hora) as totales
+    FROM obra_mano
+     INNER JOIN obras ON obras.id = obra_mano.obra_id 
+     INNER JOIN users ON users.id = obra_mano.user_id
+WHERE obra_mano.a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-10 00:00:00' 
+-----------------------------------------
+
+SELECT obra_mano.obra_id,obras.codigo,obras.nombre,obra_mano.user_id,users.name,obras.id,obra_mano.texto,obra_mano.de_fecha_hora,obra_mano.a_fecha_hora
+    FROM obra_mano
+     INNER JOIN obras ON obras.id = obra_mano.obra_id 
+     INNER JOIN users ON users.id = obra_mano.user_id
+WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-10 00:00:00' 
+
+
+
+
+
+
+
+lista de obras ,numero de registros metidos, minutos totales , y codigo de horas 
+SELECT obra_id,COUNT(obra_id) AS obra,SUM((timediff(a_fecha_hora,de_fecha_hora)*60)/10000) as totales , obras.codigo as codigoObra
+       FROM obra_mano
+       INNER JOIN obras ON obra_mano.obra_id = obras.id
+       WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-05 00:00:00'
+       AND user_id != 0
+       GROUP BY obra_id
+        
+
+
+
+
+
+
+
+
+
+*********************
+SELECT Fecha = DATEADD(DAY, DATEDIFF(WK, 0, c.de_fecha_hora),0),sum(c.id) as total from obras_mano c where c.de_fecha_hora='2018-11-05 00:00:00' GROUP BY DATEADD(DAY, DATEDIFF(WK,0,c.de_fecha_hora),0);
+
+
+
+SELECT obra_id,user_id,texto,de_fecha_hora,a_fecha_hora,SUM((timediff(a_fecha_hora,de_fecha_hora)*60)/10000) as totales 
+    FROM `obra_mano`
+     WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-05 00:00:00' 
+
+
+REGISTRO DE HORAS DE UN DIA 
+
+SELECT obra_mano.obra_id,obras.codigo,obras.nombre,
+obra_mano.user_id,users.name,
+obra_mano.texto,obra_mano.de_fecha_hora,obra_mano.a_fecha_hora,
+(timediff(obra_mano.a_fecha_hora,obra_mano.de_fecha_hora)*60)/10000 as totales
+    FROM obra_mano
+     INNER JOIN obras ON obras.id = obra_mano.obra_id 
+     INNER JOIN users ON users.id = obra_mano.user_id
+WHERE obra_mano.a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-10 00:00:00' 
+
+
+
+
+
+SELECT obra_mano.obra_id,user_id,texto,de_fecha_hora,a_fecha_hora,SUM((timediff(a_fecha_hora,de_fecha_hora)*60)/10000) as totales 
+    FROM `obra_mano`
+     WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-05 00:00:00' 
+
+
+SELECT obra_id,user_id,texto,de_fecha_hora,a_fecha_hora,SUM((timediff(a_fecha_hora,de_fecha_hora)*60)/10000) as totales 
+    FROM `obra_mano`
+     WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-05 00:00:00' 
+
+
+SELECT obra_id,COUNT(obra_id) AS obra
+       FROM obra_mano
+       WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-05 00:00:00'
+       AND user_id != 0
+       GROUP BY obra_id
+
+
+HORAS POR OBRA X DATEDIFF
+SELECT obra_id,COUNT(obra_id) AS obra,SUM((timediff(a_fecha_hora,de_fecha_hora)*60)/10000) as totales , obras.codigo as codigoObra
+       FROM obra_mano
+       WHERE a_fecha_hora BETWEEN '2018-11-04 00:00:00' AND '2018-11-05 00:00:00'
+       AND user_id != 0
+       GROUP BY obra_id
+        INNER JOIN obras ON obra_mano.obra_id = obras.id
+
+Read more at: https://www.vichaunter.org/desarrollo-web/joins-mysql-bien-explicado-lo-necesitas-saber
+
+
+
+
+
+       18
+2
+420.0000
+24
+2
+276.0000
+25
+2
+354.0000

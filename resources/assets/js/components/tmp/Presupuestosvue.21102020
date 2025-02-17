@@ -1,0 +1,1878 @@
+<template>
+  <main class="main">
+    <!-- Breadcrumb -->
+    <ol class="breadcrumb"></ol>
+    <div class="container-fluid">
+      <!-- Ejemplo de tabla Listado -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-align-justify"></i> Ventas
+          <button type="button" @click="mostrarDetalle()" class="btn btn-secondary">
+            <i class="icon-plus"></i>&nbsp;Nuevo
+          </button>
+          <button type="button" @click="cargarPdf()" class="btn btn-info">
+            <i class="icon-doc"></i>&nbsp;Reporte
+          </button>
+        </div>
+        <!-- Listado-->
+        <template v-if="listado==1">
+          <div class="card-body">
+            <div class="form-group row">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <select class="form-control col-md-3" v-model="criterio">
+                    <option value="tipo_comprobante">Tipo Comprobante</option>
+                    <option value="num_comprobante">Número Comprobante</option>
+                    <option value="fecha_hora">Fecha-Hora</option>
+                  </select>
+                  <input
+                    type="text"
+                    v-model="buscar"
+                    @keyup.enter="listarVenta(1,buscar,criterio)"
+                    class="form-control"
+                    placeholder="Texto a buscar"
+                  />
+                  <button
+                    type="submit"
+                    @click="listarVenta(1,buscar,criterio)"
+                    class="btn btn-primary"
+                  >
+                    <i class="fa fa-search"></i> Buscar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped table-sm">
+                <thead>
+                  <tr>
+                    <th>Opciones</th>
+                    <th>Usuario</th>
+                    <th>Cliente</th>
+                    <th>Tipo Comprobante</th>
+                    <th>Serie Comprobante</th>
+                    <th>Número Comprobante</th>
+                    <th>Fecha Hora</th>
+                    <th>Total</th>
+                    <th>Impuesto</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="venta in arrayVenta" :key="venta.id">
+                    <td>
+                      <button
+                        type="button"
+                        @click="verVenta(venta.id)"
+                        class="btn btn-success btn-sm"
+                      >
+                        <i class="icon-eye"></i>
+                      </button> &nbsp;
+                      <template v-if="venta.tipo_comprobante=='TICKET'">
+                        <button
+                          type="button"
+                          @click="pdfTicket(venta.id)"
+                          class="btn btn-warning btn-sm"
+                        >
+                          <i class="icon-doc"></i>
+                        </button> &nbsp;
+                      </template>
+                      <template v-else>
+                        <button
+                          type="button"
+                          @click="pdfVenta(venta.id)"
+                          class="btn btn-info btn-sm"
+                        >
+                          <i class="icon-doc"></i>
+                        </button> &nbsp;
+                      </template>
+                      <template v-if="venta.estado=='Registrado'">
+                        <button
+                          type="button"
+                          class="btn btn-danger btn-sm"
+                          @click="desactivarVenta(venta.id)"
+                        >
+                          <i class="icon-trash"></i>
+                        </button>
+                      </template>
+                    </td>
+                    <td v-text="venta.usuario"></td>
+                    <td v-text="venta.nombre"></td>
+                    <td v-text="venta.tipo_comprobante"></td>
+                    <td v-text="venta.serie_comprobante"></td>
+                    <td v-text="venta.num_comprobante"></td>
+                    <td v-text="venta.fecha_hora"></td>
+                    <td v-text="venta.total"></td>
+                    <td v-text="venta.impuesto"></td>
+                    <td v-text="venta.estado"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" v-if="pagination.current_page > 1">
+                  <a
+                    class="page-link"
+                    href="#"
+                    @click.prevent="cambiarPagina(pagination.current_page - 1,buscar,criterio)"
+                  >Ant</a>
+                </li>
+                <li
+                  class="page-item"
+                  v-for="page in pagesNumber"
+                  :key="page"
+                  :class="[page == isActived ? 'active' : '']"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    @click.prevent="cambiarPagina(page,buscar,criterio)"
+                    v-text="page"
+                  ></a>
+                </li>
+                <li class="page-item" v-if="pagination.current_page < pagination.last_page">
+                  <a
+                    class="page-link"
+                    href="#"
+                    @click.prevent="cambiarPagina(pagination.current_page + 1,buscar,criterio)"
+                  >Sig</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </template>
+        <!--Fin Listado-->
+        <!-- DATOS DEL PRESUPUESTO-->
+        <template v-else-if="listado==0">
+          <div class="card-body">
+            <ul class="nav nav-tabs nav-justified">
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  @click.prevent="setActive('administracion')"
+                  :class="{ active: isActive('administracion') }"
+                  href="#administracion"
+                >administracion</a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  @click.prevent="setActive('destino')"
+                  :class="{ active: isActive('destino') }"
+                  href="#destino"
+                >Destino</a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  @click.prevent="setActive('presupuesto')"
+                  :class="{ active: isActive('presupuesto') }"
+                  href="#presupuesto"
+                >Presupuesto</a>
+              </li>
+            </ul>
+            <div class="tab-content py-3" id="myTabContent">
+              <!-- ADMINISTRACION -->
+              <div
+                class="tab-pane fade"
+                :class="{ 'active show': isActive('administracion') }"
+                id="administracion"
+              >
+                Datos del presupuesto
+                <div class="form-group row border">
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <label for>Cliente(*)</label>
+                      <!-- <v-select
+                                        :on-search="selectCliente"
+                                        label="nombre"
+                                        :options="arrayCliente"
+                                        placeholder="Buscar Clientes..."
+                                        :onChange="getDatosCliente"                                        
+                                    >
+
+                      </v-select>-->
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="cabecera.cliente_descripcion"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <label for>Contacto</label>
+                    <input type="text" class="form-control" v-model="cabecera.contacto" />
+                  </div>
+
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for>Descricpcion del Trabajo(*)</label>
+                      <!-- <v-select
+                                        :on-search="selectCliente"
+                                        label="nombre"
+                                        :options="arrayCliente"
+                                        placeholder="Buscar Clientes..."
+                                        :onChange="getDatosCliente"                                        
+                                    >
+
+                      </v-select>-->
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="cabecera.descripcion_trabajo"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Estado</label>
+                      <select class="form-control" v-model="cabecera.estado">
+                        <option value="0">Seleccione</option>
+                        <option value="presupuestado">Presupuestado</option>
+                        <option value="aceptado">Aceptado</option>
+                        <option value="denegado">Denegado</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Referencia</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="cabecera.referencia"
+                        placeholder="000x"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Fecha Entrega</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="cabecera.fecha_hora_entrega"
+                        placeholder="000xx"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div v-show="errorVenta" class="form-group row div-error">
+                      <div class="text-center text-error">
+                        <div v-for="error in errorMostrarMsjVenta" :key="error" v-text="error"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- DESTINO -->
+              <div
+                class="tab-pane fade"
+                :class="{ 'active show': isActive('destino') }"
+                id="destino"
+              >
+                Destino del presupuesto
+                <div class="form-group row border">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for>Fecha de Envio</label>
+                      <input type="text" class="form-control" v-model="cabecera.fecha_envio" />
+                    </div>
+                  </div>
+                  <div class="col-md-9">
+                    <label for>Direccion de envio(*)</label>
+                    <input type="text" class="form-control" v-model="cabecera.direccion_envio" />
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Opción Envío</label>
+                      <select class="form-control" v-model="cabecera.opcion_envio">
+                        <option value="0">Seleccione</option>
+                        <option value="entrega">Entrega Al Cliente</option>
+                        <option value="montaje">Montaje</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Tipo de Envío</label>
+                      <select class="form-control" v-model="cabecera.tipo_envio">
+                        <option value="0">Seleccione</option>
+                        <option value="entrega">Nuestros Medios</option>
+                        <option value="montaje">Mensajero</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Contacto Envío</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="cabecera.contacto_envio"
+                        placeholder="000x"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-md-12">
+                    <div v-show="errorVenta" class="form-group row div-error">
+                      <div class="text-center text-error">
+                        <div v-for="error in errorMostrarMsjVenta" :key="error" v-text="error"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- PRESUPUESTO -->
+              <div
+                class="tab-pane fade"
+                :class="{ 'active show': isActive('presupuesto') }"
+                id="presupuesto"
+              >
+                Datos del presupuesto
+                <div class="table-responsive">
+                  <div style="padding:15px;display:block;min-height:65px">
+                   <!--  <div class="pull-right">
+                      <div class="btn-group" role="group" aria-label="download PDFs button group">
+                        <a
+                          target="_blank"
+                          href="/process/download-simplified-pdf-budget/17/ABACO-44_05082020.pdf"
+                          class="btn btn-sm btn-primary"
+                          title="Descargar PDF simplificado"
+                        >
+                          <i class="fa fa-download" aria-hidden="true"></i> PDF simplificado
+                        </a>
+                      </div>
+                    </div>
+                    <a
+                      class="btn btn-sm btn-primary"
+                      data-toggle="modal"
+                      data-target="#modalAddProduct17"
+                    >
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> Añadir producto
+                    </a>
+                    <a
+                      class="btn btn-sm btn-primary"
+                      data-toggle="modal"
+                      data-target="#modalAddProductBudget-17"
+                    >
+                      <i class="fa fa-tag" aria-hidden="true"></i> Añadir producto tarifa
+                    </a>
+                    <a
+                      class="btn btn-sm btn-primary"
+                      data-toggle="modal"
+                      data-target="#modalEditBudgetFile17"
+                    >
+                      <i class="fa fa-pencil" aria-hidden="true"></i> Editar datos de la versión
+                    </a>
+                    -->
+
+                     <button type="button" @click="abrirModalArticulo('articulo','registrar')" class="
+                     btn btn-sm btn-primary">
+                            <i class="icon-plus"></i>&nbsp;Nuevo Artículo
+                        </button>
+
+
+                  </div>
+
+                  <table id="table-fixed-last-column17" class="table table-bordered">
+                    <thead>
+                      <tr style>
+                        <th class="bg-grey" style="min-width:480px">REF</th>
+                        <th class="bg-grey">Lam</th>
+                        <th class="bg-grey">Trans</th>
+                        <th class="bg-grey text-right">
+                          m
+                          <sup>2</sup>
+                        </th>
+                        <th class="bg-grey text-right">Ancho</th>
+                        <th class="bg-grey text-right">Alto</th>
+                        <th class="bg-grey text-right">Paños</th>
+                        <th class="bg-grey text-right">UDs.</th>
+                        <th class="bg-grey text-right">
+                          Total m
+                          <sup>2</sup>
+                        </th>
+                        <th class="bg-grey text-right">Mont.</th>
+                        <th class="bg-grey text-right">Subcont.</th>
+                        <th class="bg-grey text-right">Beneficio</th>
+                        <th class="bg-grey text-right">Comisión</th>
+                        <th class="bg-grey text-right">PVP</th>
+                        <th class="bg-grey text-right" style="width:115px;min-width:115px;">ACCIONES</th>
+                      </tr>
+                    </thead>
+
+                    <tbody v-for="(articulo, idx) in articulos" :key="idx">
+                      <tr style>
+                        <td class="product-name" colspan="12" style="background-color:#f4f4f4;">
+                          <button type="button" @click="abrirModalComponente('componente','registrar',articuo)" class="
+                     btn btn-sm btn-primary">
+                            <i class="icon-plus"></i>&nbsp;Nuevo Componente
+                        </button>
+
+                          <div class="pull-right">
+                                
+
+                            <b>{{articulo.codigo | capitalize}} Coste Ud.:</b>
+                            {{articulo.}}€&nbsp;&nbsp;&nbsp;
+                            <b>Precio:</b> 0,00 €&nbsp;&nbsp;&nbsp;
+                            <b>Unidades:</b> &nbsp;&nbsp;&nbsp;
+                            <b>Total:</b> 0,00 €
+                          </div>
+                          <b>{{articulo.descripcion }}</b>
+                        </td>
+
+                        <td style="background-color:#f4f4f4;">
+                          <div class="btn-group btn-budget-group pull-right">
+                            <a
+                              class="btn btn-sm btn-primary"
+                              data-target="#modalEditProduct31"
+                              data-toggle="modal"
+                            >
+                              <i
+                                class="fa fa-pencil"
+                                aria-hidden="true"
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                title="Editar Producto"
+                              ></i>
+                            </a>
+                            <a
+                              href="/admin/process/productbudget/create-from-budget-file-product/31"
+                              class="btn btn-sm btn-primary clone_link"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Crear Producto Tarifa"
+                              onclick="return confirm('¿Estás seguro que quieres crear este producto tarifa?');"
+                            >
+                              <i class="fa fa-tags" aria-hidden="true"></i>
+                            </a>
+                            <a
+                              href="/process/clone_budget_file_product/31"
+                              class="btn btn-sm btn-primary clone_link"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Duplicar Producto"
+                              onclick="return confirm('¿Estás seguro que quieres duplicar este producto?');"
+                            >
+                              <i class="fa fa-clone" aria-hidden="true"></i>
+                            </a>
+                            <a
+                              href="/process/remove_budget_file_product/31"
+                              class="btn btn-sm btn-danger delete_link"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Eliminar Producto"
+                              onclick="return confirm('¿Estás seguro que quieres borrar este producto?');"
+                            >
+                              <i class="fa fa-trash" aria-hidden="true"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr v-for="(componente, index) in filteredRows1(articulo)" :key="index">
+                        <td>{{componente.descripcion}}-{{componente.codigo}}-{{componente.articulo_principal}}</td>
+                        <td>BRILLO</td>
+                        <td>NO</td>
+                        <td class="text-right">0,00</td>
+                        <td class="text-right">---</td>
+                        <td class="text-right">---</td>
+                        <td class="text-right">---</td>
+                        <td class="text-right">1</td>
+                        <td
+                          class="text-right bg-highlighted"
+                          data-toggle="tooltip"
+                          data-placement="top"
+                          title
+                          data-original-title="M2 corte"
+                        >0,000</td>
+                        <td class="text-right bg-highlighted">0,00</td>
+                        <td class="text-right bg-highlighted">0,00</td>
+                        <td class="text-right bg-highlighted">33,33 %</td>
+                        <td class="text-right bg-highlighted">0,00 €</td>
+                        <td class="text-right bg-highlighted">0,00 €</td>
+                        <td>
+                          <div class="btn-group btn-budget-group pull-right">
+                            <a
+                              class="btn btn-sm btn-primary edit_link"
+                              data-target="#modalEditRawMaterial-52"
+                              data-toggle="modal"
+                            >
+                              <i
+                                class="fa fa-pencil"
+                                aria-hidden="true"
+                                title="Editar Materia Prima"
+                                data-toggle="tooltip"
+                                data-placement="top"
+                              ></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                      <!-- <tr style="">
+                            <td>TRANSFER ALTA GAMA 1,22cmX100m. (5030001)</td>
+                                    <td></td>
+                                    <td>NO</td>
+                                    <td class="text-right">0,00</td>
+                                    <td class="text-right">---</td>
+                                    <td class="text-right">---</td>
+                                    <td class="text-right">---</td>
+                                    <td class="text-right">1</td>
+                                    <td class="text-right bg-highlighted" data-toggle="tooltip" data-placement="top" title="" data-original-title="M2">0,000</td>
+                                    <td class="text-right bg-highlighted">0,00</td>
+                                    <td class="text-right bg-highlighted">0,00</td>
+                                    <td class="text-right bg-highlighted">33,33 %</td>
+                                    <td class="text-right bg-highlighted">0,00 €</td>
+                                    <td class="text-right bg-highlighted">0,00 €</td>
+                                    <td>
+                                        <div class="btn-group btn-budget-group pull-right">
+                                            <a class="btn btn-sm btn-primary edit_link" data-target="#modalEditRawMaterial-53" data-toggle="modal">
+                                                <i class="fa fa-pencil" aria-hidden="true" title="Editar Materia Prima" data-toggle="tooltip" data-placement="top"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                      </tr>-->
+                    </tbody>
+
+                    <tfoot>
+                      <tr style>
+                        <th colspan="3" class="text-right" style="background-color:#f4f4f4;">TOTAL</th>
+                        <th class="text-right" style="background-color:#f4f4f4;">0,00</th>
+                        <th class="text-right" style="background-color:#f4f4f4;"></th>
+                        <th class="text-right" style="background-color:#f4f4f4;"></th>
+                        <th class="text-right" style="background-color:#f4f4f4;"></th>
+                        <th class="text-right" style="background-color:#f4f4f4;">2</th>
+                        <th class="text-right bg-highlighted">0,000</th>
+                        <th class="text-right bg-highlighted">0,00</th>
+                        <th class="text-right bg-highlighted">0,00</th>
+                        <th class="text-right bg-highlighted">0,00 %</th>
+                        <th class="text-right bg-highlighted">0,00 €</th>
+                        <th class="text-right bg-highlighted">0,00 €</th>
+                        <th>
+                          <div class="btn-group btn-budget-group pull-right">
+                            <a
+                              class="btn btn-sm btn-primary"
+                              data-toggle="modal"
+                              data-target="#modalEditBudgetFileBenefitsAndPvp-17"
+                            >
+                              <i class="fa fa-pencil"></i> Editar Totales
+                            </a>
+                          </div>
+                        </th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                  <!-- <table id="table-fixed-last-column17" class="table table-bordered fixed-column">
+                <thead>
+                <tr style="height: 57px;">
+                    <th class="bg-grey text-right" style="width:115px;min-width:115px;">ACCIONES</th>
+                </tr>
+                </thead>
+                <tbody>
+                                                                                                                                                    <tr style="height: 40px;">
+                        
+                        <td style="background-color:#f4f4f4;">
+                            <div class="btn-group btn-budget-group pull-right">
+                                <a class="btn btn-sm btn-primary" data-target="#modalEditProduct31" data-toggle="modal">
+                                    <i class="fa fa-pencil" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="" data-original-title="Editar Producto"></i>
+                                </a>
+                                <a href="/admin/process/productbudget/create-from-budget-file-product/31" class="btn btn-sm btn-primary clone_link" data-toggle="tooltip" data-placement="top" title="" onclick="return confirm('¿Estás seguro que quieres crear este producto tarifa?');" data-original-title="Crear Producto Tarifa">
+                                    <i class="fa fa-tags" aria-hidden="true"></i>
+                                </a>
+                                <a href="/process/clone_budget_file_product/31" class="btn btn-sm btn-primary clone_link" data-toggle="tooltip" data-placement="top" title="Duplicar Producto" onclick="return confirm('¿Estás seguro que quieres duplicar este producto?');">
+                                    <i class="fa fa-clone" aria-hidden="true"></i>
+                                </a>
+                                <a href="/process/remove_budget_file_product/31" class="btn btn-sm btn-danger delete_link" data-toggle="tooltip" data-placement="top" title="" onclick="return confirm('¿Estás seguro que quieres borrar este producto?');" data-original-title="Eliminar Producto">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                                                                                                                                                                                                                                    <tr style="height: 57px;">
+                            <td>
+                                <div class="btn-group btn-budget-group pull-right">
+                                    <a class="btn btn-sm btn-primary edit_link" data-target="#modalEditRawMaterial-52" data-toggle="modal">
+                                        <i class="fa fa-pencil" aria-hidden="true" title="Editar Materia Prima" data-toggle="tooltip" data-placement="top"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                                                                                                                                 <tr style="height: 57px;">
+                            
+                            
+                            <td>
+                                <div class="btn-group btn-budget-group pull-right">
+                                    <a class="btn btn-sm btn-primary edit_link" data-target="#modalEditRawMaterial-53" data-toggle="modal">
+                                        <i class="fa fa-pencil" aria-hidden="true" title="Editar Materia Prima" data-toggle="tooltip" data-placement="top"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                                                    </tbody>
+                <tfoot>
+                <tr style="height: 57px;">
+                    
+                    <th>
+                        <div class="btn-group btn-budget-group pull-right">
+                            <a class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalEditBudgetFileBenefitsAndPvp-17"><i class="fa fa-pencil"></i> Editar Totales</a>
+                        </div>
+                    </th>
+                </tr>
+                </tfoot>
+                  </table>-->
+
+                 <!--  <div style="padding:15px;display:block;min-height:65px">
+                    <div class="pull-right">
+                      <div class="btn-group" role="group" aria-label="download PDFs button group">
+                        <a
+                          target="_blank"
+                          href="/process/download-simplified-pdf-budget/17/ABACO-44_05082020.pdf"
+                          class="btn btn-sm btn-primary"
+                          title="Descargar PDF simplificado"
+                        >
+                          <i class="fa fa-download" aria-hidden="true"></i> PDF simplificado
+                        </a>
+                      </div>
+                    </div>
+                    <a
+                      class="btn btn-sm btn-primary"
+                      data-toggle="modal"
+                      data-target="#modalAddProduct17"
+                    >
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> Añadir producto
+                    </a>
+                    <a
+                      class="btn btn-sm btn-primary"
+                      data-toggle="modal"
+                      data-target="#modalAddProductBudget-17"
+                    >
+                      <i class="fa fa-tag" aria-hidden="true"></i> Añadir producto tarifa
+                    </a>
+                    <a
+                      class="btn btn-sm btn-primary"
+                      data-toggle="modal"
+                      data-target="#modalEditBudgetFile17"
+                    >
+                      <i class="fa fa-pencil" aria-hidden="true"></i> Editar datos de la versión
+                    </a>
+                  </div> -->
+                </div>
+
+               
+              </div>
+               <div class="sonata-ba-form-actions well well-small form-actions stuck">
+                  <button class="btn btn-success" type="submit" name="to_budget_form[saveAndEdit]">
+                    <i class="fa fa-save" aria-hidden="true"></i> Guardar y editar
+                  </button>
+
+                  <button class="btn btn-success" type="submit" name="to_budget_form[saveAndList]">
+                    <i class="fa fa-save"></i>
+                    <i class="fa fa-list" aria-hidden="true"></i> Guardar y regresar al listado
+                  </button>
+
+                  <a class="btn btn-info" href="/process/mark-as-budgeted/16">
+                    <i class="fa fa-check" aria-hidden="true"></i> Aceptar como Presupuestado
+                  </a>
+                  
+                </div>
+            </div>
+          </div>
+        </template>
+        <!-- Fin Detalle-->
+        <!-- Ver ingreso -->
+        <template v-else-if="listado==2">
+          <div class="card-body">
+            <div class="form-group row border">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for>Cliente</label>
+                  <p v-text="cliente"></p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label for>Fecha</label>
+                  <p v-text="fecha_hora"></p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label for>Impuesto</label>
+                <p v-text="impuesto"></p>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Tipo Comprobante</label>
+                  <p v-text="tipo_comprobante"></p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Serie Comprobante</label>
+                  <p v-text="serie_comprobante"></p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Número Comprobante</label>
+                  <p v-text="num_comprobante"></p>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row border">
+              <div class="table-responsive col-md-12">
+                <table class="table table-bordered table-striped table-sm">
+                  <thead>
+                    <tr>
+                      <th>Artículo</th>
+                      <th>Precio</th>
+                      <th>Cantidad</th>
+                      <th>Descuento</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody v-if="arrayDetalle.length">
+                    <tr v-for="detalle in arrayDetalle" :key="detalle.id">
+                      <td v-text="detalle.articulo"></td>
+                      <td v-text="detalle.precio"></td>
+                      <td v-text="detalle.cantidad"></td>
+                      <td v-text="detalle.descuento"></td>
+                      <td>{{detalle.precio*detalle.cantidad-detalle.descuento}}</td>
+                    </tr>
+                    <tr style="background-color: #CEECF5;">
+                      <td colspan="4" align="right">
+                        <strong>Total Parcial:</strong>
+                      </td>
+                      <td>$ {{totalParcial=(total-totalImpuesto).toFixed(2)}}</td>
+                    </tr>
+                    <tr style="background-color: #CEECF5;">
+                      <td colspan="4" align="right">
+                        <strong>Total Impuesto:</strong>
+                      </td>
+                      <td>$ {{totalImpuesto=((total*impuesto)).toFixed(2)}}</td>
+                    </tr>
+                    <tr style="background-color: #CEECF5;">
+                      <td colspan="4" align="right">
+                        <strong>Total Neto:</strong>
+                      </td>
+                      <td>$ {{total}}</td>
+                    </tr>
+                  </tbody>
+                  <tbody v-else>
+                    <tr>
+                      <td colspan="5">NO hay artículos agregados</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-12">
+                <button type="button" @click="ocultarDetalle()" class="btn btn-secondary">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </template>
+        <!-- fin ver ingreso -->
+      </div>
+      <!-- Fin ejemplo de tabla Listado -->
+    </div>
+    
+      <!--Inicio del modal AGREGAR ARTICULO-->
+    <div
+      class="modal fade"
+      tabindex="-1"
+      :class="{'mostrar' : modalarticulo}"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      style="display: none;"
+      aria-hidden="true" >
+      <div class="modal-dialog modal-primary modal-lg" role="document">
+        <div class="modal-content">
+            <div class="loading" style="display: none;">
+                <div class="spinner">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                </div>
+            </div>
+
+          <div class="modal-header">
+            <h4 class="modal-title"  v-text="tituloModalArticulo"></h4>
+            <button type="button" class="close" @click="cerrarModalArticulo()" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+             <div class="modal-body">
+               <div class="row">
+                  
+                   <!--  <div class="col-md-6 col-sm-4">
+                        <div class="form-group"><label class="control-label" for="anchura">Código</label> <input type="text" v-model="articulo.codigo" id="codigo" name="codigo" class="rm-width form-control" >  </div> 
+                    </div> -->
+                    <div class="col-md-12 col-sm-4">
+                        <div class="form-group"><label class="control-label" for="descripcion">Descripcion</label> <textarea type="text"  v-model="articulodescripcion" id="descripcion" name="descripcion" class="rm-height form-control" ></textarea>  </div> 
+                    </div>
+                </div>
+              
+                <div class="row">
+                  
+                   
+                    <div class="col-md-3 col-sm-3">
+                        <div class="form-group"><label class="control-label" for="unidades">Unidades</label> <input type="text"  v-model="articulounidades" id="unidades" name="unidades" class="rm-uds form-control" >  </div> 
+                    </div>
+              
+                    <div class="col-md-3">
+                        <div class="form-group"><label class="control-label" for="pvp">PVP</label> <input type="text" id="pvp"  v-model="articulopvp" name="pvp" class="form-control" >  </div> 
+                    </div>
+                     <div class="col-md-3">
+                        <div class="form-group"><label class="control-label" for="total">Total</label> <input type="text"  v-model="articulototal" id="total" name="total" class="form-control" >  </div> 
+                    </div>
+           
+
+                </div>
+            
+                 <div class="row">
+                    <div class="col-md-3 col-sm-4"></div>
+                    <div class="col-sm-6 col-sm-12 no-width-info-content" style="display: block;">
+                        <p>Total : </p>
+                       ${{ articulototal=articulounidades*articulopvp}}
+                        <!--<p>$ {{total=calcularPvp}}</p> -->                    
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-4"></div>
+                  <!--   <div class="col-sm-6 col-sm-12 no-width-info-content" style="display: block;">
+                        <p><i class="fa fa-info-circle"></i> La materia prima no tiene ancho definido, por favor trabaje con m<sup>2</sup></p>
+                    </div> -->
+                </div>
+             <!--  <div class="col-md-6">
+                <div class="input-group">
+                  <select class="form-control col-md-3" v-model="criterioA">
+                    <option value="nombre">Nombre</option>
+                    <option value="descripcion">Descripción</option>
+                    <option value="codigo">Código</option>
+                  </select>
+                  <input
+                    type="text"
+                    v-model="buscarA"
+                    @keyup.enter="listarArticulo(buscarA,criterioA)"
+                    class="form-control"
+                    placeholder="Texto a buscar"
+                  />
+                  <button
+                    type="submit"
+                    @click="listarArticulo(buscarA,criterioA)"
+                    class="btn btn-primary"
+                  >
+                    <i class="fa fa-search"></i> Buscar
+                  </button>
+                </div>
+              </div>
+                </div>
+                <div class="table-responsive">
+                <table class="table table-bordered table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th>Opciones</th>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio Venta</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="articulo in arrayArticulo" :key="articulo.id">
+                        <td>
+                        <button
+                            type="button"
+                            @click="agregarDetalleModal(articulo)"
+                            class="btn btn-success btn-sm"
+                        >
+                            <i class="icon-check"></i>
+                        </button>
+                        </td>
+                        <td v-text="articulo.codigo"></td>
+                        <td v-text="articulo.nombre"></td>
+                        <td v-text="articulo.nombre_categoria"></td>
+                        <td v-text="articulo.precio_venta"></td>
+                        <td v-text="articulo.stock"></td>
+                        <td>
+                        <div v-if="articulo.condicion">
+                            <span class="badge badge-success">Activo</span>
+                        </div>
+                        <div v-else>
+                            <span class="badge badge-danger">Desactivado</span>
+                        </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div> -->
+            </div>
+        
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="cerrarModalArticulo()">Cerrar</button>
+            <button
+              type="button"
+              
+              class="btn btn-primary"
+              @click="guardarModalArticulo()"
+            >Guardar</button>
+           <!--  <button
+              type="button"
+              v-if="tipoAccion==2"
+              class="btn btn-primary"
+              @click="actualizarPersona()"
+            >Actualizar</button> -->
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+    
+    <!--Inicio del modal AGREGAR COMPONENTE-->
+    <div
+      class="modal fade"
+      tabindex="-1"
+      :class="{'mostrar' : modalcomponente}"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      style="display: none;"
+      aria-hidden="true" >
+      <div class="modal-dialog modal-primary modal-lg" role="document">
+        <div class="modal-content">
+            <div class="loading" style="display: none;">
+                <div class="spinner">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                </div>
+            </div>
+
+          <div class="modal-header">
+            <h4 class="modal-title"  v-text="tituloModalComponente"></h4>
+            <button type="button" class="close" @click="cerrarModalComponente()" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+            <div class="modal-body">
+               <div class="row">
+                  
+                   <!--  <div class="col-md-6 col-sm-4">
+                        <div class="form-group"><label class="control-label" for="anchura">Código</label> <input type="text" v-model="articulo.codigo" id="codigo" name="codigo" class="rm-width form-control" >  </div> 
+                    </div> -->
+                    <div class="col-md-12 col-sm-4">
+                        <div class="form-group"><label class="control-label" for="descripcion">Descripcion</label> <textarea type="text"  v-model="articulo.descripcion" id="descripcion" name="descripcion" class="rm-height form-control" ></textarea>  </div> 
+                    </div>
+                </div>
+              
+             <div class="row">
+                  
+                    <div class="col-md-3 col-sm-4">
+                        <div class="form-group"><label class="control-label" for="anchura">Anchura</label> <input type="text" v-model="anchura" id="anchura" name="anchura" class="rm-width form-control" >  </div> 
+                    </div>
+                    <div class="col-md-3 col-sm-4">
+                        <div class="form-group"><label class="control-label" for="altura">Altura</label> <input type="text"  v-model="articulo.altura" id="altura" name="altura" class="rm-height form-control" >  </div> 
+                    </div>
+                      <div class="col-md-3 col-sm-4">
+                    
+                        <div class="form-group"><label class="control-label" for="metros">M2 Unidad</label> <input type="text"  v-model="articulo.metros" id="metros" name="metros" class="rm-m2 form-control">  </div> 
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="form-group"><label class="control-label" for="unidades">Unidades</label> <input type="text"  v-model="articulo.unidades" id="unidades" name="unidades" class="rm-uds form-control" >  </div> 
+                    </div>
+            </div>
+             <div class="row">
+                     <div class="col-md-3">
+                        <div class="form-group"><label class="control-label" for="montaje">Montaje</label> <input type="text"  v-model="articulo.montaje" id="montaje" name="montaje" class="form-control" >  </div> 
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group"><label class="control-label" for="subcontratacion">Subcontratacion</label> <input type="text" id="subcontratacion"  v-model="articulo.subcontratacion"  name="subcontratacion" class="form-control" >  </div> 
+                    </div>
+              
+                     <div class="col-md-3">
+                        <div class="form-group"><label class="control-label" for="beneficios">Beneficios</label> <input type="text"  v-model="articulo.beneficios" id="beneficios" name="beneficios" class="form-control" >  </div> 
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group"><label class="control-label" for="pvp">PVP</label> <input type="text" id="pvp"  v-model="articulo.pvp" name="pvp" class="form-control" >  </div> 
+                    </div>
+
+
+                </div>
+            
+                 <div class="row">
+                    <div class="col-md-3 col-sm-4"></div>
+                    <div class="col-sm-6 col-sm-12 no-width-info-content" style="display: block;">
+                        <p>Total : </p>
+                        <!--<p>$ {{total=calcularPvp}}</p> -->                    
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-4"></div>
+                    <div class="col-sm-6 col-sm-12 no-width-info-content" style="display: block;">
+                        <p><i class="fa fa-info-circle"></i> La materia prima no tiene ancho definido, por favor trabaje con m<sup>2</sup></p>
+                    </div>
+                </div>
+             <!--  <div class="col-md-6">
+                <div class="input-group">
+                  <select class="form-control col-md-3" v-model="criterioA">
+                    <option value="nombre">Nombre</option>
+                    <option value="descripcion">Descripción</option>
+                    <option value="codigo">Código</option>
+                  </select>
+                  <input
+                    type="text"
+                    v-model="buscarA"
+                    @keyup.enter="listarArticulo(buscarA,criterioA)"
+                    class="form-control"
+                    placeholder="Texto a buscar"
+                  />
+                  <button
+                    type="submit"
+                    @click="listarArticulo(buscarA,criterioA)"
+                    class="btn btn-primary"
+                  >
+                    <i class="fa fa-search"></i> Buscar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped table-sm">
+                <thead>
+                  <tr>
+                    <th>Opciones</th>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio Venta</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="articulo in arrayArticulo" :key="articulo.id">
+                    <td>
+                      <button
+                        type="button"
+                        @click="agregarDetalleModal(articulo)"
+                        class="btn btn-success btn-sm"
+                      >
+                        <i class="icon-check"></i>
+                      </button>
+                    </td>
+                    <td v-text="articulo.codigo"></td>
+                    <td v-text="articulo.nombre"></td>
+                    <td v-text="articulo.nombre_categoria"></td>
+                    <td v-text="articulo.precio_venta"></td>
+                    <td v-text="articulo.stock"></td>
+                    <td>
+                      <div v-if="articulo.condicion">
+                        <span class="badge badge-success">Activo</span>
+                      </div>
+                      <div v-else>
+                        <span class="badge badge-danger">Desactivado</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="cerrarModalComponente()">Cerrar</button>
+            <button
+              type="button"
+              
+              class="btn btn-primary"
+              @click="guardarModalComponente()"
+            >Guardar</button>
+           <!--  <button
+              type="button"
+              v-if="tipoAccion==2"
+              class="btn btn-primary"
+              @click="actualizarPersona()"
+            >Actualizar</button> -->
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+
+    <!--Fin del modal-->
+  </main>
+</template>
+
+<script>
+export default {
+  props: ["ruta"],
+  data() {
+    return {
+
+        articulodescripcion:"",
+        articuloprecio: 0,
+        articulounidades:0,
+        articulototal:0,
+        articulopvp:0,
+        articulocodigo="",
+        
+      
+      cabecera: [],
+      activeItem: "administracion",
+      articulo :[],
+      total: 0,
+      anchura: 0,
+
+      articulos: [
+        {
+          codigo: "0005",
+          descripcion: "DESCRIPCION ARTICULO",
+          cantidad: "1",
+          precio: "50",
+          total: "12112",
+          observaciones: "observaciones"
+        },
+        {
+          codigo: "0001",
+          descripcion: "DESCRIPCION ARTICULO",
+          cantidad: "1",
+          precio: "10",
+          total: "12112",
+          observaciones: "observaciones"
+        },
+        {
+          codigo: "0002",
+          descripcion: "DESCRIPCION ARTICULO2",
+          cantidad: "2",
+          precio: "20",
+          total: "222",
+          observaciones: "observaciones2"
+        }
+      ],
+      componentes: [
+        {
+          articulo_principal: "0003",
+          codigo: "10029",
+          descripcion: "DESCRIPCION ARTICULO",
+          metros: "1",
+          anchura: "10",
+          altura: "12112",
+          unidades: "1",
+          montaje: "1023",
+          subcontratacion: "12112",
+          beneficios: "1",
+          pvp: 100,
+          horas: "12112",
+          observaciones: "observaciones"
+        },
+        {
+          articulo_principal: "0001",
+          codigo: "10029",
+          descripcion: "DESCRIPCION ARTICULO",
+          metros: "1",
+          anchura: "1023",
+          altura: "12112",
+          unidades: "1",
+          montaje: "1023",
+          subcontratacion: "12112",
+          beneficios: "1",
+          pvp: 300,
+          horas: "12112",
+          observaciones: "observaciones"
+        },
+        {
+          articulo_principal: "0001",
+          codigo: "1002922",
+          descripcion: "DESCRIPCION ARTICULO22",
+          metros: "12",
+          anchura: "10232",
+          altura: "1211222",
+          unidades: "12",
+          montaje: "10232",
+          subcontratacion: "121122",
+          beneficios: "12",
+          pvp: 200,
+          horas: "121122",
+          observaciones: "observaciones2"
+        },
+        {
+          articulo_principal: "0002",
+          codigo: "1002923",
+          descripcion: "DESCRIPCION ARTICULO223",
+          metros: "33",
+          anchura: "333",
+          altura: "33",
+          unidades: "3",
+          montaje: "33",
+          subcontratacion: "333",
+          beneficios: "3",
+          pvp: 300,
+          horas: "333",
+          observaciones: "observaciones2"
+        },
+        {
+          articulo_principal: "0002",
+          codigo: "44444",
+          descripcion: "DESCRIPCION ARTICULO224",
+          metros: "124",
+          anchura: "4",
+          altura: "44",
+          unidades: "444",
+          montaje: "444",
+          subcontratacion: "444",
+          beneficios: "44",
+          pvp: 400,
+          horas: "444",
+          observaciones: "observaciones2"
+        }
+      ],
+
+      //
+      venta_id: 0,
+      idcliente: 0,
+      cliente: "",
+      fecha_hora: "",
+      tipo_comprobante: "BOLETA",
+      serie_comprobante: "",
+      num_comprobante: "",
+      impuesto: 0.18,
+      total: 0.0,
+      totalImpuesto: 0.0,
+      totalParcial: 0.0,
+      arrayVenta: [],
+      arrayCliente: [],
+      arrayDetalle: [],
+      listado: 1,
+      modal: 0,
+      modalarticulo: 0,
+      modalcomponente: 0,
+      tituloModal: "",
+      tituloModalArticulo: "",
+      tituloModalComponente: "",
+
+      tipoAccion: 0,
+      errorVenta: 0,
+      errorMostrarMsjVenta: [],
+      pagination: {
+        total: 0,
+        current_page: 0,
+        per_page: 0,
+        last_page: 0,
+        from: 0,
+        to: 0
+      },
+      offset: 3,
+      criterio: "num_comprobante",
+      buscar: "",
+      criterioA: "nombre",
+      buscarA: "",
+      arrayArticulo: [],
+      idarticulo: 0,
+      codigo: "",
+      articulo: "",
+      precio: 0,
+      cantidad: 0,
+      descuento: 0,
+      stock: 0,
+      searchTerm: "0001",
+      filter: ""
+    };
+  },
+  components: {},
+  filters: {
+    capitalize: function(value) {
+      //this.searchTerm = value;
+      //  console.log('capitalizce', value, this.searchTerm);
+
+      if (!value) return "";
+      value = value.toString();
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+  },
+  computed: {
+
+      calcularM2() {
+          console.log('calcularM2');
+
+      },
+      calcularPvp() {
+          console.log('calcularPvp',this.total, this.anchura);
+          this.total = this.anchura * this.anchura;
+
+      },
+    filteredRows() {
+      //console.log('FILTER', this.searchTerm);
+      return this.componentes.filter(componente => {
+        console.log("filter", this.componentes, component.articulo_principal);
+        const compo = componente.articulo_principal.toString().toLowerCase();
+
+        return compo.includes(componente.articulo_principal);
+      });
+    },
+    isActived: function() {
+      return this.pagination.current_page;
+    },
+    //Calcula los elementos de la paginación
+    pagesNumber: function() {
+      if (!this.pagination.to) {
+        return [];
+      }
+
+      var from = this.pagination.current_page - this.offset;
+      if (from < 1) {
+        from = 1;
+      }
+
+      var to = from + this.offset * 2;
+      if (to >= this.pagination.last_page) {
+        to = this.pagination.last_page;
+      }
+
+      var pagesArray = [];
+      while (from <= to) {
+        pagesArray.push(from);
+        from++;
+      }
+      return pagesArray;
+    },
+    calcularTotal: function() {
+      var resultado = 0.0;
+      for (var i = 0; i < this.arrayDetalle.length; i++) {
+        resultado =
+          resultado +
+          (this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad -
+            this.arrayDetalle[i].descuento);
+      }
+      return resultado;
+    }
+  },
+  methods: {
+    filteredRows1(a) {
+      console.log("filtered dos ", a);
+      return this.componentes.filter(componente => {
+        console.log(
+          "filter dos ",
+          this.componentes,
+          componente.articulo_principal,
+          a
+        );
+        const compo = componente.articulo_principal.toString().toLowerCase();
+
+        return compo.includes(a.codigo);
+      });
+    },
+    isActive(menuItem) {
+      return this.activeItem === menuItem;
+    },
+    setActive(menuItem) {
+      this.activeItem = menuItem;
+    },
+    listarVenta(page, buscar, criterio) {
+      let me = this;
+      var url =
+        this.ruta +
+        "/venta?page=" +
+        page +
+        "&buscar=" +
+        buscar +
+        "&criterio=" +
+        criterio;
+      axios
+        .get(url)
+        .then(function(response) {
+          var respuesta = response.data;
+          me.arrayVenta = respuesta.ventas.data;
+          me.pagination = respuesta.pagination;
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    cargarPdf() {
+      window.open(this.ruta + "/venta/listarPdf", "_blank");
+    },
+    selectCliente(search, loading) {
+      let me = this;
+      loading(true);
+
+      var url = this.ruta + "/cliente/selectCliente?filtro=" + search;
+      axios
+        .get(url)
+        .then(function(response) {
+          let respuesta = response.data;
+          q: search;
+          me.arrayCliente = respuesta.clientes;
+          loading(false);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    getDatosCliente(val1) {
+      let me = this;
+      me.loading = true;
+      me.idcliente = val1.id;
+    },
+    buscarArticulo() {
+      let me = this;
+      var url = this.ruta + "/articulo/buscarArticuloVenta?filtro=" + me.codigo;
+
+      axios
+        .get(url)
+        .then(function(response) {
+          var respuesta = response.data;
+          me.arrayArticulo = respuesta.articulos;
+
+          if (me.arrayArticulo.length > 0) {
+            me.articulo = me.arrayArticulo[0]["nombre"];
+            me.idarticulo = me.arrayArticulo[0]["id"];
+            me.precio = me.arrayArticulo[0]["precio_venta"];
+            me.stock = me.arrayArticulo[0]["stock"];
+          } else {
+            me.articulo = "No existe artículo";
+            me.idarticulo = 0;
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    pdfVenta(id) {
+      window.open(this.ruta + "/venta/pdf/" + id + "," + "_blank");
+    },
+    pdfTicket(id) {
+      window.open(this.ruta + "/venta/pdfTicket/" + id + "," + "_blank");
+    },
+    cambiarPagina(page, buscar, criterio) {
+      let me = this;
+      //Actualiza la página actual
+      me.pagination.current_page = page;
+      //Envia la petición para visualizar la data de esa página
+      me.listarVenta(page, buscar, criterio);
+    },
+    encuentra(id) {
+      var sw = 0;
+      for (var i = 0; i < this.arrayDetalle.length; i++) {
+        if (this.arrayDetalle[i].idarticulo == id) {
+          sw = true;
+        }
+      }
+      return sw;
+    },
+    encuentraArticulo(id) {
+      var sw = 0;
+      for (var i = 0; i < this.articulos.length; i++) {
+        if (this.articulos[i].codigoArticulo == id) {
+          sw = true;
+        }
+      }
+      return sw;
+    },
+    eliminarDetalle(index) {
+      let me = this;
+      me.arrayDetalle.splice(index, 1);
+    },
+    agregarDetalle() {
+      let me = this;
+      if (me.idarticulo == 0 || me.cantidad == 0 || me.precio == 0) {
+      } else {
+        if (me.encuentra(me.idarticulo)) {
+          swal({
+            type: "error",
+            title: "Error...",
+            text: "Ese artículo ya se encuentra agregado!"
+          });
+        } else {
+          if (me.cantidad > me.stock) {
+            swal({
+              type: "error",
+              title: "Error...",
+              text: "NO hay stock disponible!"
+            });
+          } else {
+            me.arrayDetalle.push({
+              idarticulo: me.idarticulo,
+              articulo: me.articulo,
+              cantidad: me.cantidad,
+              precio: me.precio,
+              descuento: me.descuento,
+              stock: me.stock
+            });
+            me.codigo = "";
+            me.idarticulo = 0;
+            me.articulo = "";
+            me.cantidad = 0;
+            me.precio = 0;
+            me.descuento = 0;
+            me.stock = 0;
+          }
+        }
+      }
+    },
+    agregarDetalleModal(data = []) {
+      let me = this;
+      if (me.encuentra(data["id"])) {
+        swal({
+          type: "error",
+          title: "Error...",
+          text: "Ese artículo ya se encuentra agregado!"
+        });
+      } else {
+        me.arrayDetalle.push({
+          idarticulo: data["id"],
+          articulo: data["nombre"],
+          cantidad: 1,
+          precio: data["precio_venta"],
+          descuento: 0,
+          stock: data["stock"]
+        });
+      }
+    },
+    listarArticulo(buscar, criterio) {
+      let me = this;
+      var url =
+        this.ruta +
+        "/articulo/listarArticuloVenta?buscar=" +
+        buscar +
+        "&criterio=" +
+        criterio;
+      axios
+        .get(url)
+        .then(function(response) {
+          var respuesta = response.data;
+          me.arrayArticulo = respuesta.articulos.data;
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    registrarVenta() {
+      if (this.validarVenta()) {
+        return;
+      }
+
+      let me = this;
+
+      axios
+        .post(this.ruta + "/venta/registrar", {
+          idcliente: this.idcliente,
+          tipo_comprobante: this.tipo_comprobante,
+          serie_comprobante: this.serie_comprobante,
+          num_comprobante: this.num_comprobante,
+          impuesto: this.impuesto,
+          total: this.total,
+          data: this.arrayDetalle
+        })
+        .then(function(response) {
+          me.listado = 1;
+          me.listarVenta(1, "", "num_comprobante");
+          me.idcliente = 0;
+          me.tipo_comprobante = "BOLETA";
+          me.serie_comprobante = "";
+          me.num_comprobante = "";
+          me.impuesto = 0.18;
+          me.total = 0.0;
+          me.idarticulo = 0;
+          me.articulo = "";
+          me.cantidad = 0;
+          me.precio = 0;
+          me.stock = 0;
+          me.codigo = "";
+          me.descuento = 0;
+          me.arrayDetalle = [];
+          window.open(
+            this.ruta + "/venta/pdf/" + response.data.id + "," + "_blank"
+          );
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    validarVenta() {
+      let me = this;
+      me.errorVenta = 0;
+      me.errorMostrarMsjVenta = [];
+      var art;
+
+      me.arrayDetalle.map(function(x) {
+        if (x.cantidad > x.stock) {
+          art = x.articulo + " con stock insuficiente";
+          me.errorMostrarMsjVenta.push(art);
+        }
+      });
+
+      if (me.idcliente == 0)
+        me.errorMostrarMsjVenta.push("Seleccione un Cliente");
+      if (me.tipo_comprobante == 0)
+        me.errorMostrarMsjVenta.push("Seleccione el comprobante");
+      if (!me.num_comprobante)
+        me.errorMostrarMsjVenta.push("Ingrese el número de comprobante");
+      if (!me.impuesto)
+        me.errorMostrarMsjVenta.push("Ingrese el impuesto de compra");
+      if (me.arrayDetalle.length <= 0)
+        me.errorMostrarMsjVenta.push("Ingrese detalles");
+
+      if (me.errorMostrarMsjVenta.length) me.errorVenta = 1;
+
+      return me.errorVenta;
+    },
+    mostrarDetalle() {
+      let me = this;
+      me.listado = 0;
+
+      me.idproveedor = 0;
+      me.tipo_comprobante = "BOLETA";
+      me.serie_comprobante = "";
+      me.num_comprobante = "";
+      me.impuesto = 0.18;
+      me.total = 0.0;
+      me.idarticulo = 0;
+      me.articulo = "";
+      me.cantidad = 0;
+      me.precio = 0;
+      me.arrayDetalle = [];
+    },
+    ocultarDetalle() {
+      this.listado = 1;
+    },
+    verVenta(id) {
+      let me = this;
+      me.listado = 2;
+
+      //Obtener los datos del ingreso
+      var arrayVentaT = [];
+      var url = this.ruta + "/venta/obtenerCabecera?id=" + id;
+
+      axios
+        .get(url)
+        .then(function(response) {
+          var respuesta = response.data;
+          arrayVentaT = respuesta.venta;
+
+          me.cliente = arrayVentaT[0]["nombre"];
+          me.fecha_hora = arrayVentaT[0]["fecha_hora"];
+          me.tipo_comprobante = arrayVentaT[0]["tipo_comprobante"];
+          me.serie_comprobante = arrayVentaT[0]["serie_comprobante"];
+          me.num_comprobante = arrayVentaT[0]["num_comprobante"];
+          me.impuesto = arrayVentaT[0]["impuesto"];
+          me.total = arrayVentaT[0]["total"];
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+
+      //Obtener los datos de los detalles
+      var urld = this.ruta + "/venta/obtenerDetalles?id=" + id;
+
+      axios
+        .get(urld)
+        .then(function(response) {
+          //console.log(response);
+          var respuesta = response.data;
+          me.arrayDetalle = respuesta.detalles;
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+    cerrarModalArticulo() {
+      this.modalarticulo = 0;
+      this.tituloModalArticulo = "";
+    },
+    abrirModalArticulo(modelo,accion) {
+      this.arrayArticulo = [];
+      this.modalarticulo = 1;
+      this.tituloModalArticulo = "Alta de articulo";
+    },
+   guardarModalArticulo() {
+      let me = this;
+      if (me.encuentra(me.articulocodigo)) {
+        swal({
+          type: "error",
+          title: "Error...",
+          text: "Ese artículo ya se encuentra agregado!"
+        });
+      } else {
+        me.articulos.push({
+            codigo:me.articuloCodigo,
+          descripcion: me.articulodescripcion,
+          cantidad: me.articulounidades,
+          precio: me.articulopvp,
+          total : me.articulounidades*me.articulopvp,
+          
+        });
+
+        this.cerrarModalArticulo();
+
+       
+      }
+    },
+guardarModalComponente(data = []) {
+      let me = this;
+      if (me.encuentra(data["codigo"])) {
+        swal({
+          type: "error",
+          title: "Error...",
+          text: "Ese artículo ya se encuentra agregado!"
+        });
+      } else {
+        me.articulos.push({
+            codigo: data['codigo'],
+          descripcion: data["descripcion"],
+          cantidad: data["cantidad"],
+          precio: data["precio"],
+          
+          observaciones: data["obxervaciones"]
+        });
+
+        this.cerrarModalComponente();
+       
+      }
+    },
+     cerrarModalComponente() {
+      this.modalcomponente = 0;
+      this.tituloModalComponente = "";
+    },
+    abrirModalComponente(modelo,accion,componente) {
+        console.log('abrirmodalComponente', modelo,accion, componente);
+      this.arrayArticulo = [];
+      this.modalcomponente = 1;
+      this.tituloModalComponente = "Alta de Componente";
+    },
+     cerrarModal() {
+      this.modal = 0;
+      this.tituloModal = "";
+    },
+    abrirModal() {
+      this.arrayArticulo = [];
+      this.modal = 1;
+      this.tituloModal = "Alta de Componente";
+    },
+    desactivarVenta(id) {
+      swal({
+        title: "Esta seguro de anular esta venta?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Aceptar!",
+        cancelButtonText: "Cancelar",
+        confirmButtonClass: "btn btn-success",
+        cancelButtonClass: "btn btn-danger",
+        buttonsStyling: false,
+        reverseButtons: true
+      }).then(result => {
+        if (result.value) {
+          let me = this;
+
+          axios
+            .put(this.ruta + "/venta/desactivar", {
+              id: id
+            })
+            .then(function(response) {
+              me.listarVenta(1, "", "num_comprobante");
+              swal(
+                "Anulado!",
+                "La venta ha sido anulada con éxito.",
+                "success"
+              );
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        } else if (
+          // Read more about handling dismissals
+          result.dismiss === swal.DismissReason.cancel
+        ) {
+        }
+      });
+    }
+  },
+  mounted() {
+    this.listarVenta(1, this.buscar, this.criterio);
+  }
+};
+</script>
+<style>
+.form-actions.stuck {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  margin-left: -15px;
+  margin-bottom: 0;
+  z-index: 5;
+  border-radius: 0;
+}
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.table-responsive::-webkit-scrollbar {
+  background: lightyellow;
+  width: 12px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: gray;
+}
+
+.table-responsive > .fixed-column {
+  right: 0;
+  top: 0px;
+  background: #f4f4f4;
+  position: absolute;
+  display: inline-block;
+  width: auto;
+  border-top: 0px solid;
+  border-left: 1px solid #808080;
+}
+
+.nav-tabs .nav-link.active {
+  border-top-color: #3c8dbc !important;
+  border-top: 3px solid transparent;
+}
+.modal-content {
+  width: 100% !important;
+  position: absolute !important;
+}
+.mostrar {
+  display: list-item !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  background-color: #3c29297a !important;
+}
+.div-error {
+  display: flex;
+  justify-content: center;
+}
+.text-error {
+  color: red !important;
+  font-weight: bold;
+}
+@media (min-width: 600px) {
+  .btnagregar {
+    margin-top: 2rem;
+  }
+}
+</style>

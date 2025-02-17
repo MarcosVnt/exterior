@@ -1,0 +1,67 @@
+@startuml
+
+title Classes - Class Diagram
+
+
+class Contrato {
+  +Int numero
+  +void crear()
+}
+
+class Propietario
+class Valla 
+class Ubicacion 
+
+
+class Terreno 
+
+@enduml
+
+contrato           car
+  valla_id
+
+Valla 
+ id 
+  terreno_id 
+
+terreno 
+  id 
+
+
+
+mechanics
+    id - integer
+    name - string
+ 
+cars
+    id - integer
+    model - string
+    mechanic_id - integer
+ 
+owners
+    id - integer
+    name - string
+    car_id - intege
+
+
+https://www.youtube.com/watch?v=aqccE0lSOjs
+
+user              terreno         projects
+  id                 id             id
+
+listings          vallas          enviroments
+  user_id           terreno_id      project_id
+
+listingResponses  contratos       deployments
+   listings_id       vallas_id      enviroments_id
+
+
+
+
+
+
+
+
+
+
+
